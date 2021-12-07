@@ -18,7 +18,7 @@ pub enum Token {
     Operator(Operator),
     Literal(Literal),
     Variable(Box<str>),
-    Brace(Brace)
+    Parenthesis(Parenthesis)
 }
 
 #[derive(Debug, PartialEq)]
@@ -29,37 +29,37 @@ pub enum Literal {
     Integer(i64)
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Operator {
     Or = 1,
     And = 2,
-    ExclusiveOr,
-    Not,
+    Not = 4,
 
-    NotEqual,
-    Equal,
+    NotEqual = 5,
+    Equal = 6,
 
-    Greater,
-    GreaterOrEqual,
-    Less,
-    LessOrEqual,
+    Greater = 7,
+    GreaterOrEqual = 8,
+    Less = 9,
+    LessOrEqual = 10,
 
-    Plus,
-    Minus,
-    Divide,
-    Multiply,
+    Plus = 11,
+    Minus = 12,
+    Divide = 13,
+    Multiply = 14,
 
-    LeftParenthesis,
-    RightParenthesis,
+    PowerOf = 15,
+
+
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Brace {
-    LeftBrace,
-    RightBrace
+pub enum Parenthesis {
+    LeftParenthesis,
+    RightParenthesis
 }
 
-fn string_to_tokens(expression_string: &str) -> Result<Vec<Token>, &'static str>
+pub fn string_to_tokens(expression_string: &str) -> Result<Vec<Token>, &'static str>
 {
     let mut result:Vec<Option<Token>> = Vec::new();
     let mut iter = expression_string.chars().peekable();
@@ -80,6 +80,9 @@ fn string_to_tokens(expression_string: &str) -> Result<Vec<Token>, &'static str>
             '&' => {
                 extract_operator(&mut iter, Operator::And, '&')
             }
+            '=' => {
+                extract_operator(&mut iter, Operator::Equal, '=')
+            }
             '!' => {
                 extract_operator_simple(&mut iter, Operator::Not, Operator::NotEqual,'=')
             }
@@ -89,11 +92,26 @@ fn string_to_tokens(expression_string: &str) -> Result<Vec<Token>, &'static str>
             '>' => {
                 extract_operator_simple(&mut iter, Operator::Greater, Operator::GreaterOrEqual,'=')
             }
+            '^' => {
+                Some(Token::Operator(Operator::PowerOf))
+            }
+            '+' => {
+                Some(Token::Operator(Operator::Plus))
+            }
+            '-' | '−' => {
+                Some(Token::Operator(Operator::Minus))
+            }
+            '*' | '×' => {
+                Some(Token::Operator(Operator::Multiply))
+            }
+            '/' | '÷' => {
+                Some(Token::Operator(Operator::Divide))
+            }
             ')' => {
-                Some(Token::Brace(Brace::RightBrace))
+                Some(Token::Parenthesis(Parenthesis::RightParenthesis))
             }
             '(' => {
-                Some(Token::Brace(Brace::LeftBrace))
+                Some(Token::Parenthesis(Parenthesis::LeftParenthesis))
             }
             _ => {
                 None
@@ -214,41 +232,11 @@ mod tests {
 
     #[test]
     fn some_test() {
-        let x = "( some && false ) 12 ddd 23.8";
+        let x = "3 < 4 && 23.8 >= 40.4 ";
         let result = string_to_tokens(x);
 
         println!("{:?}", result);
     }
 
-    // #[test]
-    fn it_works() {
-        // let chars = vec![
-        //     '+', '-', '*', '/', '%', '^', '(', ')', ',', ';', '=', '!', '>', '<', '&', '|', ' ',
-        // ];
 
-        let some = 'A'..='Z';
-        let logical_candidate = '&'..='|';
-
-        // for i in logical_candidate {
-        //     println!("{}", i);
-        // }
-        //
-        //
-
-        let relational_operators = vec!["<", "<=", ">", ">="];
-        let equality_operators = vec!["==", "!="];
-        let logical_operators = vec!["||", "&&"];
-
-
-
-
-        for char in logical_operators {
-            string_to_tokens(char);
-
-            // assert_eq!(
-            //     format!("{}", char),
-            //     format!("{}", char_to_partial_token(char))
-            // );
-        }
-    }
 }
