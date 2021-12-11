@@ -7,18 +7,24 @@
 //! variable -> a someName
 //! operator -> + - / * && ||
 
-use std::iter::Peekable;
-use std::str::Chars;
+// use std::iter::Peekable;
+// use std::str::Chars;
+
+extern crate alloc;
 
 
-
+use alloc::boxed::Box;
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::iter::Peekable;
+use core::str::Chars;
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    Operator(Operator),
+    Operator(OperatorProperties),
     Literal(Literal),
     Variable(Box<str>),
-    Parenthesis(Parenthesis)
+    Parenthesis(Parenthesis),
 }
 
 #[derive(Debug, PartialEq)]
@@ -26,48 +32,92 @@ pub enum Literal {
     String(Box<str>),
     Boolean(bool),
     Decimal(f64),
-    Integer(i64)
+    Integer(i64),
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Operator {
-    Or = 1,
-    And = 2,
-    Not = 4,
+    Or,
+    And,
+    Not,
 
-    NotEqual = 5,
-    Equal = 6,
+    NotEqual,
+    Equal,
 
-    Greater = 7,
-    GreaterOrEqual = 8,
-    Less = 9,
-    LessOrEqual = 10,
+    Greater,
+    GreaterOrEqual,
+    Less,
+    LessOrEqual,
 
-    Plus = 11,
-    Minus = 12,
-    Divide = 13,
-    Multiply = 14,
+    Plus,
+    Minus,
+    Divide,
+    Multiply,
 
-    PowerOf = 15,
-
+    PowerOf,
 
 }
+
+// impl Token {
+//     pub fn getSome(&self) -> OperatorProperties {
+//         if let &Token::Operator(i) = self {
+//             i
+//         }
+//         else {
+//             panic!("called MyEnum::FooBarBaz() on {:?}", self)
+//         }
+//     }
+//
+// }
+
+const OR_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "||", precedence: 1, left_associative: false, operator: Operator::Or});
+
+const AND_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "&&", precedence: 2, left_associative: false, operator: Operator::And });
+
+const NOT_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "!=", precedence: 3, left_associative: false, operator: Operator::NotEqual });
+const EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "==", precedence: 3, left_associative: false, operator: Operator::Equal });
+
+const GREATER_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: ">", precedence: 4, left_associative: false, operator: Operator::Greater });
+const GREATER_OR_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: ">=", precedence: 4, left_associative: false, operator: Operator::GreaterOrEqual });
+const LESS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "<", precedence: 4, left_associative: false, operator: Operator::Less });
+const LESS_OR_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "<=", precedence: 4, left_associative: false, operator: Operator::LessOrEqual });
+
+
+const PLUS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "+", precedence: 5, left_associative: false, operator: Operator::Plus });
+const MINUS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "-", precedence: 5, left_associative: false, operator: Operator::Minus });
+const DIVIDE_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "/", precedence: 6, left_associative: false, operator: Operator::Divide });
+const MULTIPLY_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "*", precedence: 6, left_associative: false, operator: Operator::Multiply });
+
+const POWER_OF_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "^", precedence: 7, left_associative: true, operator: Operator::PowerOf });
+
+const NOT_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "!", precedence: 8, left_associative: false, operator: Operator::Not });
+
 
 #[derive(Debug, PartialEq)]
 pub enum Parenthesis {
     LeftParenthesis,
-    RightParenthesis
+    RightParenthesis,
 }
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct OperatorProperties {
+    pub precedence: i8,
+    pub symbol: &'static str,
+    pub left_associative: bool,
+    pub operator: Operator,
+}
+
+
+
 
 pub fn string_to_tokens(expression_string: &str) -> Result<Vec<Token>, &'static str>
 {
-    let mut result:Vec<Option<Token>> = Vec::new();
+    let mut result: Vec<Option<Token>> = Vec::new();
     let mut iter = expression_string.chars().peekable();
 
 
     while let Some(character) = iter.next() {
-
-        let operator:Option<Token> = match character {
+        let operator: Option<Token> = match character {
             'A'..='Z' | 'a'..='z' => {
                 extract_variable(&mut iter, character)
             }
@@ -75,37 +125,37 @@ pub fn string_to_tokens(expression_string: &str) -> Result<Vec<Token>, &'static 
                 extract_number(&mut iter, character)
             }
             '|' => {
-               extract_operator(&mut iter, Operator::Or, '|')
+                extract_operator(&mut iter, OR_OPERATOR, '|')
             }
             '&' => {
-                extract_operator(&mut iter, Operator::And, '&')
+                extract_operator(&mut iter, AND_OPERATOR, '&')
             }
             '=' => {
-                extract_operator(&mut iter, Operator::Equal, '=')
+                extract_operator(&mut iter, EQUAL_OPERATOR, '=')
             }
             '!' => {
-                extract_operator_simple(&mut iter, Operator::Not, Operator::NotEqual,'=')
+                extract_operator_simple(&mut iter, NOT_OPERATOR, NOT_EQUAL_OPERATOR, '=')
             }
             '<' => {
-                extract_operator_simple(&mut iter, Operator::Less, Operator::LessOrEqual,'=')
+                extract_operator_simple(&mut iter, LESS_OPERATOR, LESS_OR_EQUAL_OPERATOR, '=')
             }
             '>' => {
-                extract_operator_simple(&mut iter, Operator::Greater, Operator::GreaterOrEqual,'=')
+                extract_operator_simple(&mut iter, GREATER_OPERATOR, GREATER_OR_EQUAL_OPERATOR, '=')
             }
             '^' => {
-                Some(Token::Operator(Operator::PowerOf))
+                Some(POWER_OF_OPERATOR)
             }
             '+' => {
-                Some(Token::Operator(Operator::Plus))
+                Some(PLUS_OPERATOR)
             }
             '-' | '−' => {
-                Some(Token::Operator(Operator::Minus))
+                Some(MINUS_OPERATOR)
             }
             '*' | '×' => {
-                Some(Token::Operator(Operator::Multiply))
+                Some(MULTIPLY_OPERATOR)
             }
             '/' | '÷' => {
-                Some(Token::Operator(Operator::Divide))
+                Some(DIVIDE_OPERATOR)
             }
             ')' => {
                 Some(Token::Parenthesis(Parenthesis::RightParenthesis))
@@ -118,7 +168,6 @@ pub fn string_to_tokens(expression_string: &str) -> Result<Vec<Token>, &'static 
             }
         };
         result.push(operator);
-
     }
     let filtered_result = result.into_iter().filter_map(|e| e).collect();
     return Ok(filtered_result);
@@ -139,10 +188,9 @@ fn extract_number(expression_string_iterator: &mut Peekable<Chars>, character: c
                 number_string.push(character);
             }
             _ => {
-                break
+                break;
             }
         }
-
     }
 
     let literal = if is_integer {
@@ -157,7 +205,6 @@ fn extract_number(expression_string_iterator: &mut Peekable<Chars>, character: c
 }
 
 fn extract_variable(expression_string_iterator: &mut Peekable<Chars>, character: char) -> Option<Token> {
-
     let mut token_string = String::new();
     token_string.push(character);
 
@@ -167,10 +214,9 @@ fn extract_variable(expression_string_iterator: &mut Peekable<Chars>, character:
                 token_string.push(character);
             }
             _ => {
-                break
+                break;
             }
         }
-
     }
 
     let mut token = Token::Variable(Box::from(token_string.clone()));
@@ -187,29 +233,29 @@ fn extract_variable(expression_string_iterator: &mut Peekable<Chars>, character:
     return Some(token);
 }
 
-fn extract_operator_simple(expression_string_iterator: &mut Peekable<Chars>, operator: Operator, second_operator: Operator, expected: char) -> Option<Token> {
+fn extract_operator_simple(expression_string_iterator: &mut Peekable<Chars>, operator: Token, second_operator: Token, expected: char) -> Option<Token> {
     return match expression_string_iterator.peek() {
         Some(value) => {
             if *value == expected {
-                Some(Token::Operator(operator));
+                Some(operator);
             }
-            Some(Token::Operator(second_operator))
+            Some(second_operator)
         }
         None => { None }
-    }
+    };
 
 }
 
 
-fn extract_operator(expression_string_iterator: &mut Peekable<Chars>, operator: Operator, expected: char) -> Option<Token> {
+fn extract_operator(expression_string_iterator: &mut Peekable<Chars>, operator: Token, expected: char) -> Option<Token> {
     match expression_string_iterator.peek() {
         Some(value) => {
             if *value == expected {
-                return Some(Token::Operator(operator));
+                return Some(operator);
             }
-            return None
+            return None;
         }
-        None => { return None}
+        None => { return None; }
     }
 }
 
@@ -227,7 +273,6 @@ mod tests {
         let vec = string_to_tokens(x).unwrap();
         let result = vec.first().unwrap();
         assert_eq!(*result, Token::Literal(Literal::Boolean(false)));
-
     }
 
     #[test]
@@ -235,8 +280,6 @@ mod tests {
         let x = "3 < 4 && 23.8 >= 40.4 ";
         let result = string_to_tokens(x);
 
-        println!("{:?}", result);
+        // println!("{:?}", result);
     }
-
-
 }

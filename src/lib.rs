@@ -1,3 +1,6 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+// #![cfg_attr(not(test), no_std)]
+
 mod tokenizer;
 mod eval;
 mod converter;
