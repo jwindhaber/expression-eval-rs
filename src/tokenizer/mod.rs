@@ -7,8 +7,8 @@
 //! variable -> a someName
 //! operator -> + - / * && ||
 
-// use std::iter::Peekable;
-// use std::str::Chars;
+
+
 
 extern crate alloc;
 
@@ -57,18 +57,6 @@ pub enum Operator {
     PowerOf,
 
 }
-
-// impl Token {
-//     pub fn getSome(&self) -> OperatorProperties {
-//         if let &Token::Operator(i) = self {
-//             i
-//         }
-//         else {
-//             panic!("called MyEnum::FooBarBaz() on {:?}", self)
-//         }
-//     }
-//
-// }
 
 const OR_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "||", precedence: 1, left_associative: false, operator: Operator::Or});
 
@@ -237,11 +225,11 @@ fn extract_operator_simple(expression_string_iterator: &mut Peekable<Chars>, ope
     return match expression_string_iterator.peek() {
         Some(value) => {
             if *value == expected {
-                Some(operator);
+                Some(second_operator);
             }
-            Some(second_operator)
+            Some(operator)
         }
-        None => { None }
+        None => { Some(operator) }
     };
 
 }
@@ -264,11 +252,13 @@ fn extract_operator(expression_string_iterator: &mut Peekable<Chars>, operator: 
 
 #[cfg(test)]
 mod tests {
-    use crate::tokenizer::{Literal, string_to_tokens, Token};
+
+    use crate::tokenizer::{Literal, Operator, OperatorProperties, string_to_tokens, Token};
+    // use crate::tokenizer::Token::Operator;
 
 
     #[test]
-    fn simple_boolean_expression() {
+    fn simple_boolean_literal_expression() {
         let x = "false";
         let vec = string_to_tokens(x).unwrap();
         let result = vec.first().unwrap();
@@ -276,10 +266,31 @@ mod tests {
     }
 
     #[test]
+    fn simple_integer_literal_expression() {
+        let x = "3";
+        let vec = string_to_tokens(x).unwrap();
+        let result = vec.first().unwrap();
+        assert_eq!(*result, Token::Literal(Literal::Integer(3)));
+    }
+
+    #[test]
+    fn simple_less_operator_expression() {
+        let x = "<";
+        let vec = string_to_tokens(x).unwrap();
+        let result = vec.get(0).unwrap();
+
+        assert_matches!(result, Token::Operator(properties) => {
+            assert_eq!(properties.operator, Operator::Less);
+        });
+    }
+
+
+    #[test]
     fn some_test() {
         let x = "3 < 4 && 23.8 >= 40.4 ";
         let result = string_to_tokens(x);
 
-        // println!("{:?}", result);
+        result;
+        //println!("{:?}", result);
     }
 }

@@ -12,3 +12,5 @@ targets = ['x86_64-unknown-linux-gnu']
 [dependencies]
 
 
+[dev-dependencies]
+assert_matches = "1.5.0"
