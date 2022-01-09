@@ -6,9 +6,17 @@
 #[cfg(test)] #[macro_use] extern crate std;
 #[cfg(test)] use std::prelude::*;
 
+use crate::converter::convert_infix_to_postfix_notation;
+use crate::eval::evaluate_tokens;
+use crate::tokenizer::{Literal, string_to_tokens};
+
 mod tokenizer;
 mod eval;
 mod converter;
 
 
-
+pub fn evaluate_expression(expression_string: &str) -> Result<Literal, &'static str> {
+    string_to_tokens(expression_string)
+        .and_then(convert_infix_to_postfix_notation)
+        .and_then(evaluate_tokens)
+}

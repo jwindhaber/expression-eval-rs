@@ -5,10 +5,9 @@ extern crate alloc;
 use crate::tokenizer::{Operator, Token, Literal};
 
 use alloc::vec::Vec;
-use core::ops::{Div, Mul, Sub, Add};
 use crate::eval::evaluation::{eval_boolean_literals, eval_decimal_literals, eval_integer_literals};
 
-pub fn evaluate_expression(tokens: Vec<Token>) -> Result<Literal, &'static str> {
+pub fn evaluate_tokens(tokens: Vec<Token>) -> Result<Literal, &'static str> {
     let mut stack: Vec<Literal> = Vec::new();
 
     tokens.into_iter().for_each(|token| {
@@ -73,7 +72,7 @@ mod tests {
     extern crate std;
 
     use crate::converter::convert_infix_to_postfix_notation;
-    use crate::eval::{evaluate_expression};
+    use crate::eval::{evaluate_tokens};
     use crate::tokenizer::{Literal, string_to_tokens};
 
 
@@ -81,7 +80,7 @@ mod tests {
     fn convert() {
         let given = string_to_tokens("( 1.0 + 5 ) / 2 + 3.0 > 5 && 6 < 5").unwrap();
         let converted_tokens = convert_infix_to_postfix_notation(given).unwrap();
-        let expression = evaluate_expression(converted_tokens).unwrap();
+        let expression = evaluate_tokens(converted_tokens).unwrap();
 
         // assert_eq!(expected, converted_tokens);
         // match expression {

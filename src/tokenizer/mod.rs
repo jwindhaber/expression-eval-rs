@@ -254,7 +254,6 @@ fn extract_operator(expression_string_iterator: &mut Peekable<Chars>, operator: 
 mod tests {
 
     use crate::tokenizer::{Literal, Operator, OperatorProperties, string_to_tokens, Token};
-    // use crate::tokenizer::Token::Operator;
 
 
     #[test]
@@ -290,7 +289,7 @@ mod tests {
         let x = "3 < 4 && 23.8 >= 40.4 ";
         let result = string_to_tokens(x);
 
-        result;
-        //println!("{:?}", result);
+        // result;
+        println!("{:?}", result);
     }
 }
