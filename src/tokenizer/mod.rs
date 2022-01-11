@@ -18,6 +18,7 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use core::iter::Peekable;
 use core::str::Chars;
+use crate::Literal::Boolean;
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
@@ -79,6 +80,9 @@ pub const MULTIPLY_OPERATOR: Token = Token::Operator(OperatorProperties { symbol
 pub const POWER_OF_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "^", precedence: 7, left_associative: true, operator: Operator::PowerOf });
 
 pub const NOT_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "!", precedence: 8, left_associative: false, operator: Operator::Not });
+
+pub const TRUE: Token = Token::Literal(Boolean(true));
+pub const FALSE: Token = Token::Literal(Boolean(false));
 
 
 #[derive(Debug, PartialEq)]
@@ -212,10 +216,10 @@ fn extract_variable(expression_string_iterator: &mut Peekable<Chars>, character:
 
     //TODO move this out of here
     if token_string == "true" {
-        token = Token::Literal(Literal::Boolean(true))
+        token = TRUE
     }
     if token_string == "false" {
-        token = Token::Literal(Literal::Boolean(false))
+        token = FALSE
     }
 
     return Some(token);
@@ -253,9 +257,10 @@ fn extract_operator(expression_string_iterator: &mut Peekable<Chars>, operator: 
 
 #[cfg(test)]
 mod tests {
-
-    use crate::tokenizer::{Literal, Operator, string_to_tokens, Token};
+    use std::prelude::v1::Vec;
+    use crate::tokenizer::{AND_OPERATOR, Literal, Operator, string_to_tokens, Token};
     use rstest::rstest;
+    use crate::Literal::Boolean;
 
     #[test]
     fn simple_boolean_literal_expression() {
@@ -282,6 +287,16 @@ mod tests {
         assert_matches!(result, Token::Operator(properties) => {
             assert_eq!(properties.operator, Operator::LessOrEqual);
         });
+    }
+
+    #[test]
+    fn simple_boolean() {
+
+        let x = "true && false";
+        let result = string_to_tokens(x).unwrap();
+        let expected = Vec::from([Token::Literal(Boolean(true)), AND_OPERATOR, Token::Literal(Boolean(false))]);
+
+        assert_eq!(result, expected);
     }
 
     #[rstest]
