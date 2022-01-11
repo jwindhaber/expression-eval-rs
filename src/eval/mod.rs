@@ -73,26 +73,15 @@ mod tests {
 
     use crate::converter::convert_infix_to_postfix_notation;
     use crate::eval::{evaluate_tokens};
-    use crate::tokenizer::{Literal, string_to_tokens};
+    use crate::Literal;
+    use crate::tokenizer::{string_to_tokens};
 
 
     #[test]
-    fn convert() {
-        let given = string_to_tokens("( 1.0 + 5 ) / 2 + 3.0 > 5 && 6 < 5").unwrap();
-        let converted_tokens = convert_infix_to_postfix_notation(given).unwrap();
-        let expression = evaluate_tokens(converted_tokens).unwrap();
-
-        // assert_eq!(expected, converted_tokens);
-        // match expression {
-        //     Literal::String(_) => {}
-        //     Literal::Boolean(_) => {}
-        //     Literal::Decimal(_) => {}
-        //     Literal::Integer(value) => {
-        //         println!("{:?}", value);
-        //     }
-        // }
-
-
-        // println!("{:?}", expression);
+    fn eval_tokens() {
+        let result = string_to_tokens("( 1.0 + 5 ) / 2 + 3.0 > 5 && 6 < 5").and_then(convert_infix_to_postfix_notation).and_then(evaluate_tokens);
+        assert_matches!(result, Result::Ok(literal) => {
+            assert_eq!(literal, Literal::Boolean(false));
+        });
     }
 }

@@ -4,7 +4,7 @@
 // for the tests lets bring assert_matches and the std crate into scope
 #[cfg(test)] #[macro_use] extern crate assert_matches;
 #[cfg(test)] #[macro_use] extern crate std;
-#[cfg(test)] use std::prelude::*;
+// #[cfg(test)] use std::prelude::*;
 
 use crate::converter::convert_infix_to_postfix_notation;
 use crate::eval::evaluate_tokens;

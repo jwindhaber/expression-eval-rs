@@ -58,27 +58,27 @@ pub enum Operator {
 
 }
 
-const OR_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "||", precedence: 1, left_associative: false, operator: Operator::Or});
+pub const OR_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "||", precedence: 1, left_associative: false, operator: Operator::Or});
 
-const AND_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "&&", precedence: 2, left_associative: false, operator: Operator::And });
+pub const AND_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "&&", precedence: 2, left_associative: false, operator: Operator::And });
 
-const NOT_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "!=", precedence: 3, left_associative: false, operator: Operator::NotEqual });
-const EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "==", precedence: 3, left_associative: false, operator: Operator::Equal });
+pub const NOT_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "!=", precedence: 3, left_associative: false, operator: Operator::NotEqual });
+pub const EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "==", precedence: 3, left_associative: false, operator: Operator::Equal });
 
-const GREATER_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: ">", precedence: 4, left_associative: false, operator: Operator::Greater });
-const GREATER_OR_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: ">=", precedence: 4, left_associative: false, operator: Operator::GreaterOrEqual });
-const LESS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "<", precedence: 4, left_associative: false, operator: Operator::Less });
-const LESS_OR_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "<=", precedence: 4, left_associative: false, operator: Operator::LessOrEqual });
+pub const GREATER_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: ">", precedence: 4, left_associative: false, operator: Operator::Greater });
+pub const GREATER_OR_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: ">=", precedence: 4, left_associative: false, operator: Operator::GreaterOrEqual });
+pub const LESS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "<", precedence: 4, left_associative: false, operator: Operator::Less });
+pub const LESS_OR_EQUAL_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "<=", precedence: 4, left_associative: false, operator: Operator::LessOrEqual });
 
 
-const PLUS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "+", precedence: 5, left_associative: false, operator: Operator::Plus });
-const MINUS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "-", precedence: 5, left_associative: false, operator: Operator::Minus });
-const DIVIDE_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "/", precedence: 6, left_associative: false, operator: Operator::Divide });
-const MULTIPLY_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "*", precedence: 6, left_associative: false, operator: Operator::Multiply });
+pub const PLUS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "+", precedence: 5, left_associative: false, operator: Operator::Plus });
+pub const MINUS_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "-", precedence: 5, left_associative: false, operator: Operator::Minus });
+pub const DIVIDE_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "/", precedence: 6, left_associative: false, operator: Operator::Divide });
+pub const MULTIPLY_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "*", precedence: 6, left_associative: false, operator: Operator::Multiply });
 
-const POWER_OF_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "^", precedence: 7, left_associative: true, operator: Operator::PowerOf });
+pub const POWER_OF_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "^", precedence: 7, left_associative: true, operator: Operator::PowerOf });
 
-const NOT_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "!", precedence: 8, left_associative: false, operator: Operator::Not });
+pub const NOT_OPERATOR: Token = Token::Operator(OperatorProperties { symbol: "!", precedence: 8, left_associative: false, operator: Operator::Not });
 
 
 #[derive(Debug, PartialEq)]
@@ -222,12 +222,13 @@ fn extract_variable(expression_string_iterator: &mut Peekable<Chars>, character:
 }
 
 fn extract_operator_simple(expression_string_iterator: &mut Peekable<Chars>, operator: Token, second_operator: Token, expected: char) -> Option<Token> {
-    return match expression_string_iterator.peek() {
+    let next_char = expression_string_iterator.peek();
+    return match next_char {
         Some(value) => {
             if *value == expected {
-                Some(second_operator);
+                return Some(second_operator);
             }
-            Some(operator)
+            return Some(operator);
         }
         None => { Some(operator) }
     };
@@ -253,8 +254,8 @@ fn extract_operator(expression_string_iterator: &mut Peekable<Chars>, operator: 
 #[cfg(test)]
 mod tests {
 
-    use crate::tokenizer::{Literal, Operator, OperatorProperties, string_to_tokens, Token};
-
+    use crate::tokenizer::{Literal, Operator, string_to_tokens, Token};
+    use rstest::rstest;
 
     #[test]
     fn simple_boolean_literal_expression() {
@@ -274,22 +275,37 @@ mod tests {
 
     #[test]
     fn simple_less_operator_expression() {
-        let x = "<";
+        let x = "<=";
         let vec = string_to_tokens(x).unwrap();
         let result = vec.get(0).unwrap();
 
         assert_matches!(result, Token::Operator(properties) => {
-            assert_eq!(properties.operator, Operator::Less);
+            assert_eq!(properties.operator, Operator::LessOrEqual);
         });
     }
 
+    #[rstest]
+    #[case::or("||", Operator::Or)]
+    #[case::and("&&", Operator::And)]
+    #[case::not("!", Operator::Not)]
+    #[case::not_equal("!=", Operator::NotEqual)]
+    #[case::equal("==", Operator::Equal)]
+    #[case::greater(">", Operator::Greater)]
+    #[case::greater_or_equal(">=", Operator::GreaterOrEqual)]
+    #[case::less("<", Operator::Less)]
+    #[case::less_or_equal("<=", Operator::LessOrEqual)]
+    #[case::plus("+", Operator::Plus)]
+    #[case::minus("-", Operator::Minus)]
+    #[case::divide("/", Operator::Divide)]
+    #[case::multiply("*", Operator::Multiply)]
+    #[case::power_of("^", Operator::PowerOf)]
+    fn simple_parametrized_operator_expression(#[case] expression: &str,#[case] expected: Operator) {
+        let vec = string_to_tokens(expression).unwrap();
+        let result = vec.get(0).unwrap();
 
-    #[test]
-    fn some_test() {
-        let x = "3 < 4 && 23.8 >= 40.4 ";
-        let result = string_to_tokens(x);
-
-        // result;
-        println!("{:?}", result);
+        assert_matches!(result, Token::Operator(properties) => {
+            assert_eq!(properties.operator, expected);
+        });
     }
+
 }

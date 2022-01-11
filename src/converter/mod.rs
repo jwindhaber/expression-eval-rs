@@ -73,36 +73,33 @@ mod tests {
     extern crate alloc;
     use alloc::vec::Vec;
     use crate::converter::convert_infix_to_postfix_notation;
+    use crate::Literal::Decimal;
     use crate::tokenizer::Literal::Integer;
-    use crate::tokenizer::{OperatorProperties, string_to_tokens};
-    use crate::tokenizer::Operator::{Divide, Minus, Multiply, Plus, PowerOf};
-    use crate::tokenizer::Token::{Literal, Operator};
+    use crate::tokenizer::{LESS_OR_EQUAL_OPERATOR, AND_OPERATOR, string_to_tokens, GREATER_OR_EQUAL_OPERATOR, Token, MULTIPLY_OPERATOR, MINUS_OPERATOR, POWER_OF_OPERATOR, DIVIDE_OPERATOR, PLUS_OPERATOR};
+    use crate::tokenizer::Token::{Literal};
 
 
     #[test]
-    fn convert() {
-        let some_input = string_to_tokens("3 < 4 && 23.8 >= 40.4 ").unwrap();
-        // let some_input = Vec::from([Literal(Integer(3)), Operator(LessOrEqual), Literal(Integer(4)), Operator(And), Literal(Decimal(23.8)), Operator(GreaterOrEqual), Literal(Decimal(40.4))]);
-        // println!("{:?}", some_input);
+    fn simple_infix_to_postfix_conversion() {
+        const INTEGER_LITERAL: Token = Literal(Integer(3));
+        const DECIMAL_LITERAL: Token = Literal(Decimal(23.8));
 
-        let converted_tokens = convert_infix_to_postfix_notation(some_input).unwrap();
-        // println!("{:?}", converted_tokens);
+        let input = Vec::from([INTEGER_LITERAL, LESS_OR_EQUAL_OPERATOR, INTEGER_LITERAL, AND_OPERATOR, DECIMAL_LITERAL, GREATER_OR_EQUAL_OPERATOR, DECIMAL_LITERAL]);
+        let converted_input = convert_infix_to_postfix_notation(input).unwrap();
+
+        let expected_output = Vec::from([INTEGER_LITERAL, INTEGER_LITERAL, LESS_OR_EQUAL_OPERATOR, DECIMAL_LITERAL, DECIMAL_LITERAL, GREATER_OR_EQUAL_OPERATOR, AND_OPERATOR]);
+
+        assert_eq!(converted_input, expected_output);
+
     }
 
     #[test]
     fn convert_with_parenthesis() {
-        let expected = Vec::from([Literal(Integer(3)), Literal(Integer(4)), Literal(Integer(2)), Operator(OperatorProperties { precedence: 6, symbol: "*", left_associative: false, operator: Multiply }), Literal(Integer(1)), Literal(Integer(5)), Operator(OperatorProperties { precedence: 5, symbol: "-", left_associative: false, operator: Minus }), Literal(Integer(2)), Literal(Integer(3)), Operator(OperatorProperties { precedence: 7, symbol: "^", left_associative: true, operator: PowerOf }), Operator(OperatorProperties { precedence: 7, symbol: "^", left_associative: true, operator: PowerOf }), Operator(OperatorProperties { precedence: 6, symbol: "/", left_associative: false, operator: Divide }), Operator(OperatorProperties { precedence: 5, symbol: "+", left_associative: false, operator: Plus })]);
+        let input = string_to_tokens("3 + 4 × 2 ÷ ( 1 − 5 ) ^ 2 ^ 3").unwrap();
+        let converted_tokens = convert_infix_to_postfix_notation(input).unwrap();
 
-        // let expected = Vec::from([Literal(Integer(3)), Literal(Integer(4)), Literal(Integer(2)), Operator(OperatorProperties { precedence: 6, symbol: "*", left_associative: false  }), Literal(Integer(1)), Literal(Integer(5)), Operator(OperatorProperties { precedence: 5, symbol: "-", left_associative: false }), Literal(Integer(2)), Literal(Integer(3)), Operator(OperatorProperties { precedence: 7, symbol: "^", left_associative: true }), Operator(OperatorProperties { precedence: 7, symbol: "^", left_associative: true }), Operator(OperatorProperties { precedence: 6, symbol: "/", left_associative: false }), Operator(OperatorProperties { precedence: 5, symbol: "+", left_associative: false })]);
+        let expected_output = Vec::from([Literal(Integer(3)), Literal(Integer(4)), Literal(Integer(2)), MULTIPLY_OPERATOR, Literal(Integer(1)), Literal(Integer(5)), MINUS_OPERATOR, Literal(Integer(2)), Literal(Integer(3)), POWER_OF_OPERATOR, POWER_OF_OPERATOR, DIVIDE_OPERATOR, PLUS_OPERATOR]);
 
-        let given = string_to_tokens("3 + 4 × 2 ÷ ( 1 − 5 ) ^ 2 ^ 3").unwrap();
-        // let some_input = Vec::from([Literal(Integer(3)), Operator(LessOrEqual), Literal(Integer(4)), Operator(And), Literal(Decimal(23.8)), Operator(GreaterOrEqual), Literal(Decimal(40.4))]);
-
-        // println!("{:?}", given);
-        let converted_tokens = convert_infix_to_postfix_notation(given).unwrap();
-
-        assert_eq!(expected, converted_tokens);
-
-        // println!("{:?}", converted_tokens);
+        assert_eq!(expected_output, converted_tokens);
     }
 }
