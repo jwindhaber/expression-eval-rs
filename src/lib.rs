@@ -30,7 +30,7 @@ pub fn evaluate_expression(expression_string: &str) -> Result<Literal, &'static 
 }
 
 
-pub fn evaluate_expression_with_context(expression_string: &str, context: BTreeMap<&str, &str>) -> Result<Literal, &'static str> {
+pub fn evaluate_expression_with_context(expression_string: &str, context: &BTreeMap<&str, &str>) -> Result<Literal, &'static str> {
     let result = string_to_tokens(expression_string);
 
     match result {
@@ -58,7 +58,7 @@ mod tests {
         context.insert("first", "4.5");
         context.insert("second", "3");
 
-        let result = evaluate_expression_with_context("first + second", context);
+        let result = evaluate_expression_with_context("first + second", &context);
 
         assert_eq!(Ok(Decimal(7.5)), result);
     }

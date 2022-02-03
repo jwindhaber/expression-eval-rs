@@ -6,9 +6,9 @@ use crate::string_to_tokens;
 use crate::tokenizer::Token;
 
 
-pub fn replace_variables_with_values_from_context(tokens: Vec<Token>, context: BTreeMap<&str, &str>) -> Result<Vec<Token>, &'static str> {
+pub fn replace_variables_with_values_from_context(tokens: Vec<Token>, context: &BTreeMap<&str, &str>) -> Result<Vec<Token>, &'static str> {
     let x: Vec<Token> = tokens.into_iter()
-        .map(|element| find_and_replace(element, &context))
+        .map(|element| find_and_replace(element, context))
         .collect();
 
     Ok(x)
@@ -47,7 +47,7 @@ mod tests {
         some_map.insert("third", "true");
 
         let tokens = string_to_tokens("first > second == third").unwrap();
-        let vec = replace_variables_with_values_from_context(tokens, some_map).unwrap();
+        let vec = replace_variables_with_values_from_context(tokens, &some_map).unwrap();
 
         let expected = Vec::from([Literal(Decimal(4.5)), GREATER_OPERATOR, Literal(Integer(3)), EQUAL_OPERATOR, Literal(Boolean(true))]);
 
