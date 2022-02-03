@@ -2,7 +2,8 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use crate::tokenizer::{Parenthesis, Token};
+use crate::definition::{Parenthesis, Token};
+
 
 pub fn convert_infix_to_postfix_notation(tokens: Vec<Token>) -> Result<Vec<Token>, &'static str> {
     let mut output_queue: Vec<Token> = Vec::new();
@@ -73,10 +74,11 @@ mod tests {
     extern crate alloc;
     use alloc::vec::Vec;
     use crate::converter::convert_infix_to_postfix_notation;
-    use crate::Literal::Decimal;
-    use crate::tokenizer::Literal::Integer;
-    use crate::tokenizer::{LESS_OR_EQUAL_OPERATOR, AND_OPERATOR, string_to_tokens, GREATER_OR_EQUAL_OPERATOR, Token, MULTIPLY_OPERATOR, MINUS_OPERATOR, POWER_OF_OPERATOR, DIVIDE_OPERATOR, PLUS_OPERATOR};
-    use crate::tokenizer::Token::{Literal};
+    use crate::definition::Token;
+    use crate::definition::Token::Literal;
+    use crate::Literal::{Decimal, Integer};
+    use crate::tokenizer::{LESS_OR_EQUAL_OPERATOR, AND_OPERATOR, string_to_tokens, GREATER_OR_EQUAL_OPERATOR, MULTIPLY_OPERATOR, MINUS_OPERATOR, POWER_OF_OPERATOR, DIVIDE_OPERATOR, PLUS_OPERATOR};
+
 
 
     #[test]

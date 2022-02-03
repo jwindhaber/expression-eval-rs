@@ -2,8 +2,9 @@ extern crate alloc;
 
 use alloc::collections::btree_map::BTreeMap;
 use alloc::vec::Vec;
+use crate::definition::Token;
 use crate::string_to_tokens;
-use crate::tokenizer::Token;
+
 
 
 pub fn replace_variables_with_values_from_context(tokens: Vec<Token>, context: &BTreeMap<&str, &str>) -> Result<Vec<Token>, &'static str> {
@@ -34,10 +35,11 @@ mod tests {
     use alloc::collections::btree_map::BTreeMap;
     use std::prelude::rust_2021::Vec;
     use crate::context::replace_variables_with_values_from_context;
+    use crate::definition::Token::Literal;
     use crate::string_to_tokens;
     use crate::Literal::{Boolean, Decimal, Integer};
     use crate::tokenizer::{EQUAL_OPERATOR, GREATER_OPERATOR};
-    use crate::tokenizer::Token::Literal;
+
 
     #[test]
     fn simple_infix_to_postfix_conversion() {

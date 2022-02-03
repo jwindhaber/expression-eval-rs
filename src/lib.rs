@@ -14,13 +14,15 @@ extern crate alloc;
 use alloc::collections::btree_map::BTreeMap;
 use crate::context::replace_variables_with_values_from_context;
 use crate::converter::convert_infix_to_postfix_notation;
+use crate::definition::Literal;
 use crate::eval::evaluate_tokens;
-use crate::tokenizer::{Literal, string_to_tokens};
+use crate::tokenizer::string_to_tokens;
 
 mod tokenizer;
 mod eval;
 mod converter;
 mod context;
+pub mod definition;
 
 
 pub fn evaluate_expression(expression_string: &str) -> Result<Literal, &'static str> {
@@ -51,6 +53,7 @@ mod tests {
     use alloc::collections::btree_map::BTreeMap;
     use crate::evaluate_expression_with_context;
     use crate::Literal::Decimal;
+
 
     #[test]
     fn simple_infix_to_postfix_conversion() {

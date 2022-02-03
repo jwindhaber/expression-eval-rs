@@ -1,4 +1,6 @@
-use crate::tokenizer::{Literal, Operator};
+use crate::definition::Operator;
+use crate::Literal;
+
 
 
 /// this function evaluates all operators with boolean input

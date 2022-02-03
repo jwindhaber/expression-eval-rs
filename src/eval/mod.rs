@@ -2,10 +2,12 @@ mod evaluation;
 
 extern crate alloc;
 
-use crate::tokenizer::{Operator, Token, Literal};
+
 
 use alloc::vec::Vec;
+use crate::definition::{Operator, Token};
 use crate::eval::evaluation::{eval_boolean_literals, eval_decimal_literals, eval_integer_literals};
+use crate::Literal;
 
 pub fn evaluate_tokens(tokens: Vec<Token>) -> Result<Literal, &'static str> {
     let mut stack: Vec<Literal> = Vec::new();
