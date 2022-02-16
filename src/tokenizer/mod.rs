@@ -69,6 +69,9 @@ pub fn string_to_tokens(expression_string: &str) -> Result<Vec<Token>, &'static 
 
     while let Some(character) = iter.next() {
         let operator: Option<Token> = match character {
+            '\'' | '\"' => {
+                extract_string_literal(&mut iter, character)
+            }
             'A'..='Z' | 'a'..='z' => {
                 extract_variable(&mut iter, character)
             }
@@ -155,6 +158,25 @@ fn extract_number(expression_string_iterator: &mut Peekable<Chars>, character: c
     return Some(Token::Literal(literal));
 }
 
+fn extract_string_literal(expression_string_iterator: &mut Peekable<Chars>, character: char) -> Option<Token> {
+    let mut token_string = String::new();
+
+    while let Some(character) = expression_string_iterator.next() {
+        match character {
+            'A'..='Z' | 'a'..='z' => {
+                token_string.push(character);
+            }
+            _ => {
+                break;
+            }
+        }
+    }
+
+    let mut token = Token::Literal(Literal::String(Box::from(token_string.clone())));
+
+    return Some(token);
+}
+
 fn extract_variable(expression_string_iterator: &mut Peekable<Chars>, character: char) -> Option<Token> {
     let mut token_string = String::new();
     token_string.push(character);
@@ -216,10 +238,37 @@ fn extract_operator(expression_string_iterator: &mut Peekable<Chars>, operator: 
 
 #[cfg(test)]
 mod tests {
-    use std::prelude::v1::Vec;
+    use std::prelude::v1::{Box, Vec};
     use crate::tokenizer::{AND_OPERATOR, Literal, Operator, string_to_tokens, Token};
     use rstest::rstest;
     use crate::Literal::Boolean;
+
+
+
+    #[test]
+    fn simple_string_literal_expression() {
+        let a = "\"A\"";
+        let vec = string_to_tokens(a).unwrap();
+        let result = vec.first().unwrap();
+        assert_eq!(*result, Token::Literal(Literal::String(Box::from("A"))));
+
+        let b = "\'B\'";
+        let vec = string_to_tokens(b).unwrap();
+        let result = vec.first().unwrap();
+        assert_eq!(*result, Token::Literal(Literal::String(Box::from("B"))));
+
+        let c = "somevar == 'C'";
+        let vec = string_to_tokens(c).unwrap();
+        let result = vec.get(2).unwrap();
+        assert_eq!(*result, Token::Literal(Literal::String(Box::from("C"))));
+
+        let d = "somevar == 'D'";
+        let vec = string_to_tokens(d).unwrap();
+        let result = vec.get(2).unwrap();
+        assert_eq!(*result, Token::Literal(Literal::String(Box::from("D"))));
+
+
+    }
 
     #[test]
     fn simple_boolean_literal_expression() {
