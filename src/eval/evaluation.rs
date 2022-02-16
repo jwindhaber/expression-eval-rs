@@ -151,3 +151,52 @@ pub fn eval_decimal_literals(operator: Operator, left: f64, right: f64) -> Resul
         }
     }
 }
+
+/// this function evaluates all operators with decimal input
+pub fn eval_string_literals(operator: Operator, left: &str, right: &str) -> Result<Literal, &'static str> {
+
+    match operator {
+        Operator::Or => {
+            Err("<left || right> is not applicable for strings!")
+        }
+        Operator::And => {
+            Err("<left && right> is not applicable for strings!")
+        }
+        Operator::Not => {
+            Err("<!> is not applicable for two strings!")
+        }
+        Operator::NotEqual => {
+            Ok(Literal::Boolean(left != right))
+        }
+        Operator::Equal => {
+            Ok(Literal::Boolean(left == right))
+        }
+        Operator::Greater => {
+            Ok(Literal::Boolean(left > right))
+        }
+        Operator::GreaterOrEqual => {
+            Ok(Literal::Boolean(left >= right))
+        }
+        Operator::Less => {
+            Ok(Literal::Boolean(left < right))
+        }
+        Operator::LessOrEqual => {
+            Ok(Literal::Boolean(left <= right))
+        }
+        Operator::Plus => {
+            Err("<+> is not applicable for two strings!")
+        }
+        Operator::Minus => {
+            Err("<-> is not applicable for two strings!")
+        }
+        Operator::Divide => {
+            Err("</> is not applicable for two strings!")
+        }
+        Operator::Multiply => {
+            Err("<*> is not applicable for two strings!")
+        }
+        Operator::PowerOf => {
+            Err("<left^right> is not applicable for decimals!")
+        }
+    }
+}

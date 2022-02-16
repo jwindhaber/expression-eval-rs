@@ -14,7 +14,7 @@ extern crate alloc;
 use alloc::collections::btree_map::BTreeMap;
 use crate::context::replace_variables_with_values_from_context;
 use crate::converter::convert_infix_to_postfix_notation;
-use crate::definition::Literal;
+use crate::definition::{Literal, Token};
 use crate::eval::evaluate_tokens;
 use crate::tokenizer::string_to_tokens;
 
@@ -52,11 +52,11 @@ mod tests {
 
     use alloc::collections::btree_map::BTreeMap;
     use crate::evaluate_expression_with_context;
-    use crate::Literal::Decimal;
+    use crate::Literal::{Boolean, Decimal};
 
 
     #[test]
-    fn simple_infix_to_postfix_conversion() {
+    fn simple_decimal_context_evaluation() {
         let mut context = BTreeMap::new();
         context.insert("first", "4.5");
         context.insert("second", "3");
@@ -66,6 +66,13 @@ mod tests {
         assert_eq!(Ok(Decimal(7.5)), result);
     }
 
+    #[test]
+    fn simple_string_context_evaluation() {
+        let mut context = BTreeMap::new();
+        context.insert("somevar", "A");
 
+        let result = evaluate_expression_with_context("somevar == 'A'", &context);
 
+        assert_eq!(Ok(Boolean(true)), result);
+    }
 }

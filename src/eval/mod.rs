@@ -6,7 +6,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use crate::definition::{Operator, Token};
-use crate::eval::evaluation::{eval_boolean_literals, eval_decimal_literals, eval_integer_literals};
+use crate::eval::evaluation::{eval_boolean_literals, eval_decimal_literals, eval_integer_literals, eval_string_literals};
 use crate::Literal;
 
 pub fn evaluate_tokens(tokens: Vec<Token>) -> Result<Literal, &'static str> {
@@ -59,6 +59,10 @@ fn evaluate_operator(right_side: &Literal, left_side: &Literal, operator: Operat
 
     } else if let (Literal::Boolean(left), Literal::Boolean(right)) = (&left_side, &right_side) {
         eval_boolean_literals(operator, *left, *right)
+
+    } else if let (Literal::String(left), Literal::String(right)) = (&left_side, &right_side) {
+        // both are strings
+        eval_string_literals(operator, &left, &right)
 
     } else {
         Err("Either the left or the right literal is not supported")
