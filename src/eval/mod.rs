@@ -6,7 +6,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 use crate::definition::{Operator, Token};
-use crate::eval::evaluation::{eval_boolean_literals, eval_decimal_literals, eval_integer_literals, eval_string_literals};
+use crate::eval::evaluation::OperatorExecutor;
 use crate::Literal;
 
 pub fn evaluate_tokens(tokens: Vec<Token>) -> Result<Literal, &'static str> {
@@ -19,7 +19,7 @@ pub fn evaluate_tokens(tokens: Vec<Token>) -> Result<Literal, &'static str> {
                 let left_side = stack.pop().unwrap();
                 let operator = operator_properties.operator;
 
-                let result = evaluate_operator(&right_side, &left_side, operator);
+                let result = OperatorExecutor::new().execute(&operator, &right_side, &left_side);
                 //TODO error handling
                 if let Ok(literal) = result { stack.push(literal)}
 
@@ -37,37 +37,6 @@ pub fn evaluate_tokens(tokens: Vec<Token>) -> Result<Literal, &'static str> {
 
 
     stack.pop().ok_or("something is wrong")
-}
-
-fn evaluate_operator(right_side: &Literal, left_side: &Literal, operator: Operator) -> Result<Literal, &'static str> {
-    if let (Literal::Integer(left), Literal::Integer(right)) = (&left_side, &right_side) {
-        eval_integer_literals(operator, *left, *right)
-
-    } else if let (Literal::Decimal(left), Literal::Decimal(right)) = (&left_side, &right_side) {
-        // both are decimals
-        eval_decimal_literals(operator, *left, *right)
-
-    } else if let (Literal::Decimal(left), Literal::Integer(right_integer)) = (&left_side, &right_side) {
-        // different transform to decimal
-        let right = *right_integer as f64;
-        eval_decimal_literals(operator, *left, right)
-
-    } else if let (Literal::Integer(left_integer), Literal::Decimal(right)) = (&left_side, &right_side) {
-        // different transform to decimal
-        let left = *left_integer as f64;
-        eval_decimal_literals(operator, left, *right)
-
-    } else if let (Literal::Boolean(left), Literal::Boolean(right)) = (&left_side, &right_side) {
-        eval_boolean_literals(operator, *left, *right)
-
-    } else if let (Literal::String(left), Literal::String(right)) = (&left_side, &right_side) {
-        // both are strings
-        eval_string_literals(operator, &left, &right)
-
-    } else {
-        Err("Either the left or the right literal is not supported")
-
-    }
 }
 
 
